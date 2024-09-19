@@ -371,12 +371,15 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
         mesh = pv.PolyData(points)
         self.mesh_dict[id(mesh)] = mesh
 
+        if type(scalar) is np.ndarray:
+            scalar = prepare_animation_scalars(scalar, n_nodes=points.shape[0], n_frames=n_frames)
+
         if render_points_as_spheres:
             mesh = mesh.glyph(scale=False, geom=pv.Sphere(radius=point_size/1000))
 
 
         if animate is not None:
-            displacements = self.get_animation_displacements(points, animate, n_frames)
+            displacements = prepare_animation_displacements(animate, n_nodes=points.shape[0], n_frames=n_frames)
             
             if scalar == 'norm':
                 scalar = np.linalg.norm(displacements, axis=1)
