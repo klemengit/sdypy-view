@@ -82,6 +82,8 @@ def prepare_animation_field(data, n_nodes=None, n_frames=None):
     """
     Prepare the input field data for the animation.
 
+    Note: What here is called "field" is called "scalars" in pyVista.
+
     Parameters
     ----------
     data : ndarray
@@ -183,8 +185,9 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             The nodal coordinates of the mesh. Shape (n_nodes, 3).
         elements : np.ndarray
             The element connectivity of the mesh. Shape (n_elements, n_nodes_per_element).
-        field : np.ndarray, optional
-            The field values to be plotted. Shape (n_elements,).
+        field : np.ndarray or string, optional
+            The field values to be plotted. Can be array or "norm" or None. If "norm",
+            the actual values are computed from the ``animate`` argument. Shape (n_nodes,).
         field_name : str, optional
             The name of the field array.
         cmap : str, optional
@@ -364,6 +367,22 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             rendering as spheres can be slow. Default is False.
         label : str, optional
             The label of the points.
+        animate : np.ndarray
+            The displacements to be animated. Shape (n_points, 3, n_frames) or
+            (n_points, 3) for mode shape. The points and directions can also be flattened to (n_points*3, n_frames).
+            If there are more than 3 DOFs per node, only the first 3 are considered.
+            To start the animation, call the ``start_animation`` method.
+        n_frames : int
+            The number of frames in a single period of the animation.
+        field : np.ndarray or string, optional
+            The field values to be plotted. Can be array or "norm" or None. If "norm",
+            the actual values are computed from the ``animate`` argument. Shape (n_points,).
+        field_name : str, optional
+            The name of the field array.
+        cmap : str, optional
+            The colormap to be used.
+        opacity : float, optional
+            The opacity of the points.
         """
         if points.ndim == 1:
             points = points[None, :]
@@ -482,6 +501,8 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             Whether to show the grid. Default is False.
         show_axes : bool, optional
             Whether to show the axes. Default is False.
+        bounding_box : bool, optional
+            Whether to add a bounding box. Default is False
         """
         try:
             if self.legend_required:
