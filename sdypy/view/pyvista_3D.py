@@ -382,6 +382,12 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
 
         self._update_meshes(frame=0) # update the meshes to the initial frame
 
+    def start_recording(self):
+        """Start the recording of the animation."""
+        self.reset_animation()
+        self.recording_gif = True
+        self.start_animation()
+
     def configure_animation(self, interval=10, camera_position=None, blocking=False):
         """Configure the animation settings.
         
@@ -400,7 +406,7 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
         self.interval = interval
         self.blocking = blocking
 
-    def configure_gif_recorder(self, gif_file: str, loop: int = 0, fps: int = 30, optimize: bool = True):
+    def configure_gif_recorder(self, gif_file: str, loop: int = 0, fps: int = 30, start_on_play: bool = False, optimize: bool = True):
         """Open the GIF recorder from the pyVista Plotter.
         
         This does not yet start the recording.
@@ -417,12 +423,18 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             The number of loops for the GIF. Default is 0, which means infinite loops.
         fps : int, optional
             The frames per second of the GIF. Default is 30.
+        start_on_play : bool, optional
+            If True, start the recording when the play button is pressed. If False,
+            the recording is started by pressing "Record" button. Default is False.
         optimize : bool, optional
             Optimize the GIF by only saving the difference between frames. This
             is used in the ``subrectangles`` argument of the pyVista ``open_gif`` method.
         """
-        self.add_toolbar_action(self.animation_toolbar, "Record", self.start_animation, self.app_window)
-        self.recording_gif = True
+        self.add_toolbar_action(self.animation_toolbar, "Record", self.start_recording, self.app_window)
+        if start_on_play:
+            self.recording_gif = True
+        else:    
+            self.recording_gif = False
         self.open_gif(gif_file, loop=loop, fps=fps, palettesize=optimize)
 
     def _update_meshes(self, frame=None):
@@ -518,6 +530,8 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
 
         if animate is not None:
             displacements = prepare_animation_displacements(animate, n_nodes=points.shape[0], n_frames=n_frames)
+
+            mesh.points = mesh.points + displacements[:, :, 0]
             
             if field == 'norm':
                 field = np.linalg.norm(displacements, axis=1)

@@ -101,11 +101,20 @@ To record a GIF, the ``configure_gif_recorder`` method must be called. Example:
     plotter.add_fem_mesh(nodes, elements, animate=mode_shape, field="norm")
 
     plotter.configure_gif_recorder('mode_shape.gif', fps=30) # Configure the GIF recorder
-    # The recording can be started from the plotter or by calling plotter.start_animation()
     
     plotter.show()
 
-The recording will last for 1 iteration of the animation. It will start recording when the animation starts.
+The recording will start on pressing the "Record" button in the toolbar. Alternatively, the
+``configure_gif_recorder`` can be called like this:
+
+.. code-block:: python
+
+    plotter.configure_gif_recorder('mode_shape.gif', fps=30, start_on_play=True)
+
+This will start the recording when the animation starts. To start the animation, call the ``start_animation`` method
+or press the "Play" button in the toolbar.
+
+The recording will last for 1 iteration of the animation.
 
 Adding custom toolbar buttons
 -----------------------------
