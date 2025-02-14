@@ -455,7 +455,6 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             mesh = self.mesh_dict[anim_dict["mesh_id"]]
             field = anim_dict["field"]
 
-            n_frames = displacements.shape[0]
             if frame >= n_frames or frame > displacements.shape[-1]-1:  # Loop the animation if desired, or stop
                 if self.recording_gif:
                     # close the plotter and gif
