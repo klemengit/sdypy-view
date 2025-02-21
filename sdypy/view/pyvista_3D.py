@@ -482,7 +482,9 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
         if self.recording_gif:
             self.write_frame()
 
-    def add_points(self, points, color='red', point_size=5.0, render_points_as_spheres=False, label="", animate=None, n_frames=100, field=None, field_name="field", cmap="viridis", opacity=1):
+    def add_points(self, points, color='red', point_size=5.0, render_points_as_spheres=False, label="", 
+                  animate=None, n_frames=100, field=None, field_name="field", cmap="viridis", opacity=1,
+                  connect_points=False, line_width=1.0):
         """Add points to the plotter.
         
         Parameters
@@ -514,11 +516,35 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
             The colormap to be used.
         opacity : float, optional
             The opacity of the points.
+        connect_points : bool or list, optional
+            If True, connects points sequentially with lines. If a list, should contain
+            pairs of point indices to connect specific points. Default is False.
+        line_width : float, optional
+            Width of the connecting lines. Default is 1.0.
         """
         if points.ndim == 1:
             points = points[None, :]
 
         mesh = pv.PolyData(points)
+        
+        # Add lines if requested
+        if connect_points is not False:
+            if connect_points is True:
+                # Connect points sequentially
+                lines = np.column_stack((
+                    np.full(points.shape[0]-1, 2),  # Two points per line
+                    np.arange(points.shape[0]-1),    # Start points
+                    np.arange(1, points.shape[0])    # End points
+                )).ravel()
+            else:
+                # Connect specific point pairs
+                lines = np.column_stack((
+                    np.full(len(connect_points), 2),  # Two points per line
+                    [pair[0] for pair in connect_points],  # Start points
+                    [pair[1] for pair in connect_points]   # End points
+                )).ravel()
+            mesh.lines = lines
+
         self.mesh_dict[id(mesh)] = mesh
 
         if type(field) is np.ndarray:
@@ -556,12 +582,13 @@ class Plotter3D(BackgroundPlotter, BasePlotter):
 
         if field is not None:
             mesh.point_data[field_name] = field_0
-            actor = self.add_mesh(mesh, show_edges=True, scalars=field_name, cmap=cmap, opacity=opacity)
-            actor.mapper.scalar_range = (np.min(field), np.max(field)) # Set the field range
+            actor = self.add_mesh(mesh, show_edges=True, scalars=field_name, cmap=cmap, 
+                                opacity=opacity, line_width=line_width)
+            actor.mapper.scalar_range = (np.min(field), np.max(field))
 
         else:
-            # actor = self.add_mesh(mesh, show_edges=True, edge_color=edge_color, opacity=opacity)
-            actor = self.add_mesh(mesh, color=color, point_size=point_size, label=label, opacity=opacity)
+            actor = self.add_mesh(mesh, color=color, point_size=point_size, label=label, 
+                                opacity=opacity, line_width=line_width)
         
         self.mesh_actor_dict[id(mesh)] = actor
 
