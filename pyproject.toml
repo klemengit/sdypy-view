@@ -19,7 +19,6 @@ dependencies = [
     "pylump",
     "pyvista",
     "pyvistaqt",
-    "pyqt5",
     "meshio",
     "imageio",
     "pyperclip",
@@ -44,6 +43,10 @@ dev = [
     "build",
     "sphinx-rtd-theme",
     "sphinx-copybutton>=0.5.2",
+]
+
+qt = [
+  "pyqt5",
 ]
 
 [project.urls]

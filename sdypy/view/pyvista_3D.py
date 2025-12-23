@@ -2,8 +2,13 @@ import pyvista as pv
 import numpy as np
 from pyvistaqt import BackgroundPlotter
 from pyvista import BasePlotter
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import  QAction
+try:
+    from PyQt5.QtCore import QTimer
+    from PyQt5.QtWidgets import  QAction
+    haspyqt = True
+except:
+    haspyqt = False
+
 import pyperclip
 from PIL import Image
 import io
@@ -203,6 +208,8 @@ def create_fem_mesh(nodes, elements):
 class Plotter3D(BackgroundPlotter, BasePlotter):
     """A PyVista background plotter with some additional functionality."""
     def __init__(self, *args, **kwargs):
+        if not haspyqt:
+            raise ImportError("Install PyQt5 in order to use this functionality.")
         
         self.recording_gif = False
         self.legend_required = False
